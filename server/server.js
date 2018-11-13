@@ -61,6 +61,52 @@ app.get('/todo/:id', (req, res) => {
     }
 });
 
+//Update Todo text By ID
+app.post('/todo/text/:id', (req, res) => {
+    
+    var id = req.params.id;
+    if(ObjectID.isValid(id)){
+
+        var text = req.body.text;
+        if(text){
+            var todo = {text};
+
+            Todo.findOneAndUpdate({_id: id}, {$set: todo}, {new: true}).then((doc) => {
+                res.send(doc);
+            }, (e) => {
+                res.status(400).send(e);
+            });
+
+        }else{
+            res.status(404).send({error: 'Invalid key'});
+        }    
+    }else{
+        res.status(404).send({error: 'Invalid Id'});
+    }
+    
+});
+
+//Update Todo Status By ID
+app.post('/todo/completed/:id', (req, res) => {
+    
+    var id = req.params.id;
+    if(ObjectID.isValid(id)){
+
+        var todo = {
+            completed: true,
+            completedAt: new Date().getTime()
+        };
+
+        Todo.findOneAndUpdate({_id: id}, {$set: todo}, {new: true}).then((doc) => {
+            res.send(doc);
+        }, (e) => {
+            res.status(400).send(e);
+        });
+    }else{
+        res.status(404).send({error: 'Invalid Id'});
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
