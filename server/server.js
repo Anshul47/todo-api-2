@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 //Insert New Todo
 app.post('/todo', (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     var todo = new Todo({
         text: req.body.text
     });
@@ -25,14 +25,15 @@ app.post('/todo', (req, res) => {
     });
 });
 
-// Get All Todo
+// Get All Todo //Sort by Date Added DESC
 app.get('/todo', (req, res) => {
-    Todo.find(null ,null , {
-            sort:{
-                completedAt: -1 //Sort by Date Added DESC
-            }
-        
-    }).then((todos) => {
+    Todo.find(
+        null, 
+        null, 
+        {
+            sort: { completedAt: -1 } 
+        }
+    ).then((todos) => {
         res.send({
             data: todos 
         });
@@ -46,9 +47,9 @@ app.get('/todo/:id', (req, res) => {
     var id = req.params.id;
     if(ObjectID.isValid(id)){
 
-        Todo.find({
-            _id: id
-        }).then((todos) => {
+        Todo.find(
+            {_id: id}
+        ).then((todos) => {
             res.send({
                 data: todos
             });
@@ -71,7 +72,11 @@ app.post('/todo/text/:id', (req, res) => {
         if(text){
             var todo = {text};
 
-            Todo.findOneAndUpdate({_id: id}, {$set: todo}, {new: true}).then((doc) => {
+            Todo.findOneAndUpdate(
+                {_id: id}, 
+                {$set: todo}, 
+                {new: true}
+            ).then((doc) => {
                 res.send(doc);
             }, (e) => {
                 res.status(400).send(e);
@@ -97,7 +102,11 @@ app.post('/todo/completed/:id', (req, res) => {
             completedAt: new Date().getTime()
         };
 
-        Todo.findOneAndUpdate({_id: id}, {$set: todo}, {new: true}).then((doc) => {
+        Todo.findOneAndUpdate(
+            {_id: id}, 
+            {$set: todo}, 
+            {new: true}
+        ).then((doc) => {
             res.send(doc);
         }, (e) => {
             res.status(400).send(e);
