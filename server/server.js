@@ -19,7 +19,9 @@ app.post('/todo', (req, res) => {
     });
 
     todo.save().then((doc) => {
-        res.send(doc);
+        res.send({
+            data: doc
+        });
     }, (e) => {
         res.status(400).send(e);
     });
@@ -77,7 +79,9 @@ app.post('/todo/text/:id', (req, res) => {
                 {$set: todo}, 
                 {new: true}
             ).then((doc) => {
-                res.send(doc);
+                res.send({
+                    data: doc
+                });
             }, (e) => {
                 res.status(400).send(e);
             });
@@ -107,7 +111,27 @@ app.post('/todo/completed/:id', (req, res) => {
             {$set: todo}, 
             {new: true}
         ).then((doc) => {
-            res.send(doc);
+            res.send({
+                data: doc
+            });
+        }, (e) => {
+            res.status(400).send(e);
+        });
+    }else{
+        res.status(404).send({error: 'Invalid Id'});
+    }
+});
+
+app.get('/todo/remove/:id', (req, res) => {
+    var id = req.params.id;
+    if(ObjectID.isValid(id)){
+
+        Todo.findByIdAndRemove(
+            {_id: id}
+        ).then((doc) => {
+            res.send({
+                data: doc
+            });
         }, (e) => {
             res.status(400).send(e);
         });
