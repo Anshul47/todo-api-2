@@ -1,9 +1,11 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 var app = express();
 const PORT = process.env.PORT || 3000;
@@ -122,6 +124,8 @@ app.post('/todo/completed/:id', (req, res) => {
     }
 });
 
+
+//Delete Todo by ID
 app.get('/todo/remove/:id', (req, res) => {
     var id = req.params.id;
     if(ObjectID.isValid(id)){
@@ -138,6 +142,63 @@ app.get('/todo/remove/:id', (req, res) => {
     }else{
         res.status(404).send({error: 'Invalid Id'});
     }
+});
+
+/*******************************************************************************/
+
+//Insert New User
+app.post('/user', (req, res) => {
+    //console.log(req.body);
+
+    var body = _.pick(req.body, ['email', 'password']);
+
+    User.find(
+        body
+    ).then((user) => {
+        //console.log(user);
+        if(user.length > 0){
+
+            var data =  _.pick(user[0], ['_id', 'email']);
+            res.header('x-auth', user[0].tokens[0].token).send({data});
+
+        }else{
+            return user;
+        }
+        
+    }).then(() => {
+
+        var user = new User(body);
+        user.save().then((doc) => {
+            return user.generateAuthToken();
+        }).then((token) => {
+            var data =  _.pick(user, ['_id', 'email']);
+            res.header('x-auth', token).send({data});
+        }).catch((e) => {
+            res.status(400).send(e);
+        });
+
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+
+});
+
+
+// Get All Todo //Sort by Date Added DESC
+app.get('/user', (req, res) => {
+    User.find(
+        null, 
+        null, 
+        {
+            sort: { completedAt: -1 } 
+        }
+    ).then((user) => {
+        res.send({
+            data: user 
+        });
+    }, (e) => {
+        res.status(400).send(e);
+    });
 });
 
 app.listen(PORT, () => {
